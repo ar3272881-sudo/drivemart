@@ -1,0 +1,29 @@
+{
+  "name": "drivemart-node",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Drive Mart FYP - Node.js, Express, MongoDB and EJS car marketplace",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "node --watch app.js",
+    "seed": "node scripts/seed.js",
+    "check": "node scripts/check.js"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cloudinary": "^2.10.0",
+    "connect-mongo": "^6.0.0",
+    "dotenv": "^17.4.2",
+    "ejs": "^6.0.1",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.5.2",
+    "express-session": "^1.19.0",
+    "helmet": "^8.2.0",
+    "mongoose": "^9.7.4",
+    "multer": "^2.2.0"
+  }
+}

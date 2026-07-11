@@ -1,0 +1,10 @@
+<div id="driveMartChat" class="dm-chat" data-endpoint="/api/chatbot" data-csrf="<%= csrfToken %>">
+  <button id="dmChatToggle" class="dm-chat-toggle" type="button" aria-label="Open Drive Mart smart assistant" aria-controls="dmChatPanel" aria-expanded="false"><i class="fa-solid fa-comments" aria-hidden="true"></i><span>CHAT</span></button>
+  <section id="dmChatPanel" class="dm-chat-panel" aria-label="Drive Mart smart assistant" hidden>
+    <header class="dm-chat-header"><div class="dm-chat-avatar"><i class="fa-solid fa-robot" aria-hidden="true"></i></div><div><strong>Drive Mart Assistant</strong><small><span class="dm-online-dot"></span> Free car helper</small></div><button id="dmChatClose" class="dm-chat-close" type="button" aria-label="Close chat"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button></header>
+    <div id="dmChatMessages" class="dm-chat-messages" aria-live="polite"><div class="dm-message dm-bot-message">Assalam-o-Alaikum! Main Drive Mart ka free smart assistant hoon. Cars, prices, budget aur booking ke bare mein pooch sakte hain.</div></div>
+    <div id="dmChatSuggestions" class="dm-chat-suggestions" aria-label="Suggested questions"><button type="button" data-question="Available cars dikhao">Available cars</button><button type="button" data-question="Sab se kam price wali car kaunsi hai?">Lowest price</button><button type="button" data-question="Meri booking status dikhao">My bookings</button><button type="button" data-question="Booking kaise karun?">Booking help</button></div>
+    <form id="dmChatForm" class="dm-chat-form" autocomplete="off"><label class="sr-only" for="dmChatInput">Ask Drive Mart assistant</label><input id="dmChatInput" name="message" type="text" maxlength="800" placeholder="Car ke bare mein poochain..." required><button type="submit" aria-label="Send message"><i class="fa-solid fa-paper-plane" aria-hidden="true"></i></button></form>
+    <p class="dm-chat-note">Free database assistant — no API key or paid credits required.</p>
+  </section>
+</div>

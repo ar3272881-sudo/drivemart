@@ -1,0 +1,33 @@
+DRIVE MART NODE.JS + MONGODB - EASY SETUP
+
+1) Node.js 20 ya latest LTS install karein.
+2) MongoDB Community install karein, ya MongoDB Atlas ka free database banayein.
+3) Is project folder ko VS Code mein open karein.
+4) .env.example ki copy bana kar naam .env rakhein.
+5) .env mein MONGODB_URI aur SESSION_SECRET set karein.
+
+Local MongoDB example:
+MONGODB_URI=mongodb://127.0.0.1:27017/drivemart
+
+6) VS Code Terminal mein commands chalayein:
+
+npm install
+npm run seed
+npm start
+
+7) Browser mein open karein:
+http://localhost:3000
+
+ADMIN LOGIN
+Email: abc@gmail.com
+Password: Admin@123
+
+USER LOGIN
+Email: mjy@gmail.com
+Password: User@123
+
+IMPORTANT:
+- Ab XAMPP, Apache, phpMyAdmin aur MySQL ki zaroorat nahi.
+- Database MongoDB mein save hoga.
+- .env file GitHub par upload na karein.
+- Seed command existing Drive Mart MongoDB data ko reset karti hai.
