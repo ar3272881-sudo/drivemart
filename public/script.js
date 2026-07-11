@@ -506,3 +506,62 @@ setTimeout(() => {
         setTimeout(() => message.remove(), 350);
     });
 }, 5000);
+
+
+// ============================
+// MOBILE NAVIGATION
+// ============================
+const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+const primaryNavigation = document.querySelector('#primary-navigation');
+
+function closeMobileMenu() {
+    if (!mobileMenuToggle || !primaryNavigation) return;
+
+    primaryNavigation.classList.remove('is-open');
+    mobileMenuToggle.setAttribute('aria-expanded', 'false');
+    mobileMenuToggle.setAttribute('aria-label', 'Open menu');
+
+    const icon = mobileMenuToggle.querySelector('i');
+    if (icon) {
+        icon.classList.remove('fa-xmark');
+        icon.classList.add('fa-bars');
+    }
+}
+
+if (mobileMenuToggle && primaryNavigation) {
+    mobileMenuToggle.addEventListener('click', () => {
+        const willOpen = !primaryNavigation.classList.contains('is-open');
+
+        primaryNavigation.classList.toggle('is-open', willOpen);
+        mobileMenuToggle.setAttribute('aria-expanded', String(willOpen));
+        mobileMenuToggle.setAttribute('aria-label', willOpen ? 'Close menu' : 'Open menu');
+
+        const icon = mobileMenuToggle.querySelector('i');
+        if (icon) {
+            icon.classList.toggle('fa-bars', !willOpen);
+            icon.classList.toggle('fa-xmark', willOpen);
+        }
+    });
+
+    primaryNavigation.addEventListener('click', (event) => {
+        if (event.target.closest('a')) closeMobileMenu();
+    });
+
+    document.addEventListener('click', (event) => {
+        if (
+            window.innerWidth <= 768 &&
+            primaryNavigation.classList.contains('is-open') &&
+            !event.target.closest('.site-header')
+        ) {
+            closeMobileMenu();
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') closeMobileMenu();
+    });
+
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) closeMobileMenu();
+    });
+}
