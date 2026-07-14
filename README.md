@@ -49,14 +49,19 @@ Open: `http://localhost:3000`
 
 Never upload `.env`. It is already listed in `.gitignore`.
 
-## Vercel note
+## Vercel deployment
 
-The project includes `api/index.js` and `vercel.json`. Set `MONGODB_URI`, `SESSION_SECRET`, and `NODE_ENV=production` in Vercel Environment Variables. Local filesystem uploads are not permanent on serverless hosting, so configure the optional Cloudinary variables for new car images:
+The project includes `api/index.js` and `vercel.json`. Add these variables in **Vercel → Project → Settings → Environment Variables**:
 
 ```env
-CLOUDINARY_CLOUD_NAME=...
-CLOUDINARY_API_KEY=...
-CLOUDINARY_API_SECRET=...
+MONGODB_URI=...
+SESSION_SECRET=...
+NODE_ENV=production
+CLOUDINARY_URL=cloudinary://API_KEY:API_SECRET@CLOUD_NAME
 ```
 
-The included seed images remain in `public/uploads`; new production uploads use Cloudinary when configured.
+`CLOUDINARY_URL` is required for adding or replacing car images on Vercel. Copy the complete **API Environment Variable** from the Cloudinary dashboard. The code also supports the three separate variables `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET`.
+
+After adding or changing an environment variable, redeploy the Vercel project. Vercel Functions cannot permanently write uploaded files into `public/uploads`, so production uploads are sent to Cloudinary. Local development can still use `public/uploads` when Cloudinary is not configured.
+
+See `VERCEL_IMAGE_SETUP_URDU.txt` for the easiest step-by-step setup.

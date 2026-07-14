@@ -31,3 +31,11 @@ IMPORTANT:
 - Database MongoDB mein save hoga.
 - .env file GitHub par upload na karein.
 - Seed command existing Drive Mart MongoDB data ko reset karti hai.
+
+VERCEL PAR CAR IMAGE UPLOAD:
+- Project mein Cloudinary support ready hai.
+- Vercel Settings -> Environment Variables mein CLOUDINARY_URL add karein.
+- Cloudinary dashboard se poori API Environment Variable copy karein.
+- Variable save karne ke baad project redeploy karein.
+- Complete guide: VERCEL_IMAGE_SETUP_URDU.txt
+
