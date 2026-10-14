@@ -11,7 +11,7 @@ async function seed() {
   await Promise.all([Booking.deleteMany({}), Car.deleteMany({}), User.deleteMany({}), Subscriber.deleteMany({})]);
   const [admin, user] = await User.create([
     { legacyId: 1, name: 'Ali Admin', email: 'abc@gmail.com', passwordHash: await bcrypt.hash('Admin@123', 12), role: 'admin' },
-    { legacyId: 2, name: 'Ahmed User', email: 'mjy@gmail.com', passwordHash: await bcrypt.hash('User@123', 12), role: 'user' }
+    { legacyId: 2, name: 'Ahmed User', email: 'mjy@gmail.com', passwordHash: await bcrypt.hash('User@123', 12), role: 'buyer' }
   ]);
   const cars = await Car.create([
     { legacyId: 2, brand: 'BMW', model: 'X9', year: 2024, price: 10000000, image: '1722429614603DeWatermark.ai_1713610471502.jpg', description: 'A premium luxury SUV with modern styling and comfortable interior.', status: 'booked' },

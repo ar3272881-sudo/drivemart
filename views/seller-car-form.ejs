@@ -1,0 +1,24 @@
+<%- include('partials/header') %>
+<section class="page-section compact-section"><div class="form-panel wide-form">
+  <div class="page-heading left-heading"><span>FR03 + FR04 + FR05</span><h1><%= mode === 'edit' ? 'Edit & Resubmit Car' : 'Submit Your Car' %></h1><p>AI can help autofill a photo and provide an indicative price. All seller listings require admin approval. <% if (mode === 'edit') { %>You can keep the current photo and documents by leaving their upload fields empty.<% } %></p></div>
+  <% if (error) { %><div class="form-error" role="alert"><%= error %></div><% } %>
+  <form id="sellerCarForm" method="post" action="<%= mode === 'edit' ? '/seller/cars/' + car._id + '/resubmit' : '/seller/cars' %>" enctype="multipart/form-data" class="app-form two-column-form">
+    <input type="hidden" name="csrf_token" value="<%= csrfToken %>">
+    <label class="full-field">Car Photo *<input id="vehicleImage" type="file" name="image" accept="image/jpeg,image/png,image/webp,image/avif" <%= mode === 'add' ? 'required' : '' %>><small>Max 5MB. Select a clear vehicle photo to enable AI scanning.</small></label>
+    <div class="full-field ai-tool-panel"><button type="button" id="scanVehicle" class="btn btn-secondary"><i class="fa-solid fa-wand-magic-sparkles"></i> Scan Image with Gemini AI</button><p id="scanResult" class="ai-feedback" role="status" aria-live="polite">Requires GEMINI_API_KEY on the server. Verify AI suggestions.</p></div>
+    <label>Brand *<input name="brand" value="<%= car.brand || '' %>" required maxlength="100" placeholder="e.g. Toyota"></label>
+    <label>Model *<input name="model" value="<%= car.model || '' %>" required maxlength="100" placeholder="e.g. Corolla"></label>
+    <label>Year *<input type="number" name="year" value="<%= car.year ?? '' %>" min="1900" max="<%= currentYear+1 %>" required></label>
+    <label>Color<input name="color" value="<%= car.color || '' %>" maxlength="60" placeholder="e.g. White"></label>
+    <label>Mileage (km) *<input type="number" name="mileage" value="<%= car.mileage ?? 0 %>" min="0" max="2000000" required></label>
+    <label>Condition *<select name="condition"><% ['excellent','good','fair','needs_work'].forEach(option => { %><option value="<%= option %>" <%= car.condition === option ? 'selected' : '' %>><%= option.replace('_',' ') %></option><% }) %></select></label>
+    <div class="full-field ai-tool-panel"><button type="button" class="btn btn-secondary" id="estimateVehicle"><i class="fa-solid fa-calculator"></i> AI Price Estimate (PKR)</button><p id="estimateResult" class="ai-feedback" role="status" aria-live="polite">AI valuation is indicative only. It is not verified market data.</p></div>
+    <label>Asking Price (PKR) *<input type="number" name="price" value="<%= car.price ?? '' %>" min="1" step="1" required></label>
+    <label>CNIC (private) *<input type="file" name="cnic" accept="image/jpeg,image/png,image/webp,application/pdf" <%= mode === 'add' ? 'required' : '' %>></label>
+    <label>Registration Document (private) *<input type="file" name="registration" accept="image/jpeg,image/png,image/webp,application/pdf" <%= mode === 'add' ? 'required' : '' %>></label>
+    <label>Number Plate Photo (private) *<input type="file" name="numberPlate" accept="image/jpeg,image/png,image/webp" <%= mode === 'add' ? 'required' : '' %>></label>
+    <label class="full-field">Description<textarea name="description" rows="4" maxlength="2000"><%= car.description || '' %></textarea></label>
+    <p class="full-field privacy-hint"><i class="fa-solid fa-lock"></i> Verification documents are stored privately and are accessible only through the protected admin review screen. They will not be displayed in public listings.</p>
+    <div class="full-field card-actions"><button type="submit" class="btn btn-primary"><%= mode === 'edit' ? 'Save & Resubmit for Approval' : 'Submit for Approval' %></button><a class="btn btn-secondary" href="/seller">Cancel</a></div>
+  </form>
+</div></section><%- include('partials/footer') %>

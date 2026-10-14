@@ -14,4 +14,9 @@ function requireAdmin(req, res, next) {
   return next();
 }
 
-module.exports = { requireLogin, requireAdmin };
+function requireSeller(req, res, next) {
+  if (!req.session.user) { req.flash('error', 'Please login as a seller.'); return res.redirect('/login'); }
+  if (!['seller', 'admin'].includes(req.session.user.role)) { req.flash('error', 'Seller account required.'); return res.redirect('/dashboard'); }
+  return next();
+}
+module.exports = { requireLogin, requireAdmin, requireSeller };

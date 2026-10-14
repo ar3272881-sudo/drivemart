@@ -9,7 +9,7 @@ const { escapeRegex, isObjectId } = require('../utils/helpers');
 const router = express.Router();
 
 router.get('/', async (req, res) => {
-  const featured = await Car.find({ status: 'available' }).sort({ createdAt: -1 }).limit(6).lean();
+  const featured = await Car.find({ status: 'available', $or: [{ approvalStatus: 'approved' }, { approvalStatus: { $exists: false } }] }).sort({ createdAt: -1 }).limit(6).lean();
   res.render('index', { pageTitle: 'Drive Mart | Premium Car Marketplace', hideSimpleFooter: true, featured });
 });
 
@@ -17,7 +17,7 @@ router.get('/inventory', async (req, res) => {
   const search = String(req.query.search || '').trim();
   const status = String(req.query.status || '');
   const allowedStatuses = ['available', 'booked', 'sold'];
-  const query = {};
+  const query = { $and: [{ $or: [{ approvalStatus: 'approved' }, { approvalStatus: { $exists: false } }] }] };
   if (search) {
     const pattern = new RegExp(escapeRegex(search), 'i');
     query.$or = [{ brand: pattern }, { model: pattern }, { description: pattern }];
@@ -30,7 +30,7 @@ router.get('/inventory', async (req, res) => {
 router.get('/cars/:id', async (req, res) => {
   if (!isObjectId(req.params.id)) { req.flash('error', 'Invalid car selected.'); return res.redirect('/inventory'); }
   const car = await Car.findById(req.params.id).lean();
-  if (!car) { req.flash('error', 'Car not found.'); return res.redirect('/inventory'); }
+  if (!car || (car.approvalStatus && car.approvalStatus !== 'approved' && req.session.user?.role !== 'admin' && String(car.seller) !== req.session.user?.id)) { req.flash('error', 'Car not found.'); return res.redirect('/inventory'); }
   return res.render('car-details', { pageTitle: `${car.brand} ${car.model} - Drive Mart`, car });
 });
 

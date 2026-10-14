@@ -7,6 +7,7 @@ const { MongoStore } = require('connect-mongo');
 const { connectDatabase } = require('./config/db');
 const flashMiddleware = require('./middleware/flash');
 const { exposeCsrf } = require('./middleware/csrf');
+const { manageIdentity } = require('./middleware/identity');
 const helpers = require('./utils/helpers');
 
 const app = express();
@@ -34,6 +35,7 @@ app.use(session({
   store: sessionStore,
   cookie: { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', maxAge: 7 * 24 * 60 * 60 * 1000 }
 }));
+app.use(manageIdentity);
 app.use(flashMiddleware);
 app.use(exposeCsrf);
 app.use((req, res, next) => {
@@ -51,6 +53,8 @@ app.use((req, res, next) => databasePromise.then(() => next()).catch(next));
 app.use(require('./routes/authRoutes'));
 app.use(require('./routes/publicRoutes'));
 app.use(require('./routes/bookingRoutes'));
+app.use('/seller', require('./routes/sellerRoutes'));
+app.use('/api/ai', require('./routes/aiRoutes'));
 app.use('/admin', require('./routes/adminRoutes'));
 app.use('/api', require('./routes/chatbotRoutes'));
 

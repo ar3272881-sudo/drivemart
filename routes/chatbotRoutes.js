@@ -10,7 +10,7 @@ const limiter = rateLimit({ windowMs: 60 * 1000, limit: 30, standardHeaders: tru
 router.post('/chatbot', limiter, verifyCsrf, async (req, res) => {
   const message = String(req.body.message || '').trim();
   if (!message || message.length > 800) return res.status(422).json({ ok: false, error: '1 se 800 characters ka message likhein.' });
-  const cars = await Car.find().sort({ price: 1, createdAt: -1 }).limit(100).lean();
+  const cars = await Car.find({ $or: [{ approvalStatus: 'approved' }, { approvalStatus: { $exists: false } }] }).sort({ price: 1, createdAt: -1 }).limit(100).lean();
   const reply = await buildReply(message, cars, req.session.user || null);
   return res.json({ ok: true, reply, mode: 'free-database-assistant' });
 });

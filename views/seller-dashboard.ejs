@@ -1,0 +1,17 @@
+<%- include('partials/header') %>
+<section class="page-section">
+  <div class="page-heading split-heading"><div><span>Seller Portal</span><h1>My Car Listings</h1><p>Submit a vehicle, upload verification documents and follow admin review.</p></div><a class="btn btn-primary" href="/seller/cars/new"><i class="fa-solid fa-plus"></i> Submit Car</a></div>
+  <div class="inventory-grid">
+    <% if (!cars.length) { %><div class="empty-state"><i class="fa-solid fa-car"></i><h2>No seller listings yet</h2><p>Add your first car to enter the admin verification queue.</p><a href="/seller/cars/new" class="btn btn-primary">Submit First Listing</a></div><% } %>
+    <% cars.forEach(car => { %>
+      <article class="inventory-card">
+        <div class="inventory-image"><img src="<%= imageSrc(car.image) %>" alt="<%= car.brand %> <%= car.model %>"><span class="status-badge status-<%= car.approvalStatus %>"><%= car.approvalStatus %></span></div>
+        <div class="inventory-content"><span class="brand-label"><%= car.brand %></span><h2><%= car.model %></h2><div class="car-meta"><span><%= car.year %></span><span>PKR <%= formatMoney(car.price) %></span></div>
+          <% if (car.approvalStatus === 'pending') { %><p>Waiting for admin verification. Not public yet.</p><% } %>
+          <% if (car.approvalStatus === 'rejected') { %><p class="review-note">Reason: <%= car.verificationNotes || 'Documents could not be verified.' %></p><a class="btn btn-secondary" href="/seller/cars/<%= car._id %>/edit">Edit &amp; Resubmit</a><% } %>
+          <% if (car.approvalStatus === 'approved') { %><p>Approved. Visible to customers.</p><a class="btn btn-primary" href="/cars/<%= car._id %>">View Public Listing</a><% } %>
+        </div>
+      </article>
+    <% }) %>
+  </div>
+</section><%- include('partials/footer') %>

@@ -1,0 +1,11 @@
+<%- include('partials/header') %>
+<section class="page-section">
+  <div class="page-heading split-heading"><div><span>FR05 — Listing Verification</span><h1>Seller Approvals</h1><p>Review seller identity and vehicle registration documents before a listing appears publicly.</p></div><a class="btn btn-secondary" href="/admin">Admin Dashboard</a></div>
+  <div class="admin-quick-links"><% ['pending','approved','rejected'].forEach(s => { %><a class="btn <%= status === s ? 'btn-primary' : 'btn-secondary' %>" href="/admin/verifications?status=<%= s %>"><%= s[0].toUpperCase()+s.slice(1) %></a><% }) %></div>
+  <div class="table-panel"><div class="table-panel-heading"><h2><%= status[0].toUpperCase()+status.slice(1) %> Seller Listings (<%= cars.length %>)</h2></div>
+    <div class="table-scroll"><table class="app-table"><thead><tr><th>Car</th><th>Seller</th><th>Ask Price</th><th>Submitted</th><th>Approval</th><th>Review</th></tr></thead>
+      <tbody><% if (!cars.length) { %><tr><td colspan="6">No <%= status %> seller listings.</td></tr><% } %>
+        <% cars.forEach(car => { %><tr><td><%= car.brand %> <%= car.model %> (<%= car.year %>)</td><td><%= car.seller?.name || 'Unknown' %><small><%= car.seller?.email || '' %></small></td><td>PKR <%= formatMoney(car.price) %></td><td><%= formatDate(car.createdAt) %></td><td><span class="status-badge status-<%= car.approvalStatus %>"><%= car.approvalStatus %></span></td><td><a class="btn btn-secondary" href="/admin/verifications/<%= car._id %>">Review Documents</a></td></tr><% }) %>
+      </tbody></table></div>
+  </div>
+</section><%- include('partials/footer') %>

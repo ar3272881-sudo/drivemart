@@ -6,23 +6,23 @@ const { verifyCsrf } = require('../middleware/csrf');
 const { isObjectId, todayInput, parseDateInput } = require('../utils/helpers');
 
 const router = express.Router();
-router.use(requireLogin);
+// Protect only booking endpoints; do not intercept unrelated /seller, /admin or /api routes.
 
 async function loadAvailableCar(req, res) {
   if (!isObjectId(req.params.id)) { req.flash('error', 'Invalid car selected.'); res.redirect('/inventory'); return null; }
   const car = await Car.findById(req.params.id).lean();
   if (!car) { req.flash('error', 'Car not found.'); res.redirect('/inventory'); return null; }
-  if (car.status !== 'available') { req.flash('error', 'This car is not currently available for booking.'); res.redirect(`/cars/${car._id}`); return null; }
+  if ((car.approvalStatus && car.approvalStatus !== 'approved') || car.status !== 'available') { req.flash('error', 'This car is not currently available for booking.'); res.redirect(`/cars/${car._id}`); return null; }
   return car;
 }
 
-router.get('/cars/:id/book', async (req, res) => {
+router.get('/cars/:id/book', requireLogin, async (req, res) => {
   const car = await loadAvailableCar(req, res);
   if (!car) return;
   return res.render('booking-form', { pageTitle: `Book ${car.brand} ${car.model}`, car, error: '', values: { phone: '', preferred_date: todayInput() } });
 });
 
-router.post('/cars/:id/book', verifyCsrf, async (req, res) => {
+router.post('/cars/:id/book', requireLogin, verifyCsrf, async (req, res) => {
   const car = await loadAvailableCar(req, res);
   if (!car) return;
   const phone = String(req.body.phone || '').trim();
@@ -38,12 +38,12 @@ router.post('/cars/:id/book', verifyCsrf, async (req, res) => {
   return res.redirect('/bookings');
 });
 
-router.get('/bookings', async (req, res) => {
+router.get('/bookings', requireLogin, async (req, res) => {
   const bookings = await Booking.find({ user: req.session.user.id }).populate('car').sort({ createdAt: -1 }).lean({ virtuals: true });
   return res.render('my-bookings', { pageTitle: 'My Bookings - Drive Mart', bookings });
 });
 
-router.post('/bookings/:id/cancel', verifyCsrf, async (req, res) => {
+router.post('/bookings/:id/cancel', requireLogin, verifyCsrf, async (req, res) => {
   if (!isObjectId(req.params.id)) return res.redirect('/bookings');
   const booking = await Booking.findOne({ _id: req.params.id, user: req.session.user.id, status: { $in: ['pending', 'approved'] } });
   if (!booking) { req.flash('error', 'Booking could not be cancelled.'); return res.redirect('/bookings'); }

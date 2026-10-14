@@ -1,0 +1,16 @@
+<%- include('partials/header') %>
+<section class="page-section compact-section">
+  <div class="page-heading left-heading"><span>Admin Review</span><h1><%= car.brand %> <%= car.model %> <small>(<%= car.year %>)</small></h1><p>Seller: <%= car.seller?.name || 'Unknown' %> — <%= car.seller?.email || '' %></p></div>
+  <div class="verification-layout"><div class="verification-panel"><img class="verify-car-photo" src="<%= imageSrc(car.image) %>" alt="Car photo"><h2>Vehicle Details</h2><div class="detail-specs"><div><span>Price</span><strong>PKR <%= formatMoney(car.price) %></strong></div><div><span>Year</span><strong><%= car.year %></strong></div><div><span>Color</span><strong><%= car.color || 'Not specified' %></strong></div><div><span>Mileage</span><strong><%= formatMoney(car.mileage || 0) %> km</strong></div></div><p><%= car.description %></p></div>
+  <div class="verification-panel"><h2>Protected Documents</h2><p class="privacy-hint">Private downloads. Never share identity documents publicly. Verify authenticity manually using authorized sources.</p>
+    <% [['cnic','Seller CNIC'],['registration','Registration Book'],['numberPlate','Number Plate Photo']].forEach(entry => { const doc = documents.find(d=>d.type===entry[0]); %>
+      <div class="document-row"><strong><%= entry[1] %></strong><% if (doc) { %><a class="btn btn-secondary" href="/admin/verifications/<%= car._id %>/documents/<%= doc.type %>">Download / View</a><% } else { %><span class="status-badge status-rejected">Missing</span><% } %></div>
+    <% }) %>
+    <p>Current state: <span class="status-badge status-<%= car.approvalStatus %>"><%= car.approvalStatus %></span></p>
+    <% if (car.approvalStatus === 'pending') { %>
+      <form action="/admin/verifications/<%= car._id %>/decision" method="post" class="app-form"><input type="hidden" name="csrf_token" value="<%= csrfToken %>"><label>Rejection Reason (required only if rejecting)<textarea name="note" rows="3" maxlength="500" placeholder="What needs correcting?"></textarea></label>
+      <div class="card-actions"><button class="btn btn-primary" name="decision" value="approved" type="submit" onclick="return confirm('Approve this listing for public display?')">Approve</button><button class="btn btn-danger" name="decision" value="rejected" type="submit">Reject</button></div></form>
+    <% } else if (car.verificationNotes) { %><p class="review-note">Rejection reason: <%= car.verificationNotes %></p><% } %>
+    <a class="btn btn-secondary" href="/admin/verifications">Back to Queue</a>
+  </div></div>
+</section><%- include('partials/footer') %>

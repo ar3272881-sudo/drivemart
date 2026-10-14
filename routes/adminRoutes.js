@@ -2,6 +2,8 @@ const express = require('express');
 const Car = require('../models/Car');
 const User = require('../models/User');
 const Booking = require('../models/Booking');
+const ListingDocument = require('../models/ListingDocument');
+const { decryptDocument } = require('../services/documentCrypto');
 const { requireAdmin } = require('../middleware/auth');
 const { verifyCsrf } = require('../middleware/csrf');
 const { carImageUpload } = require('../middleware/upload');
@@ -32,7 +34,49 @@ router.get('/', async (req, res) => {
     User.countDocuments(), Car.countDocuments(), Booking.countDocuments(), Booking.countDocuments({ status: 'pending' }),
     Booking.find().populate('user', 'name').populate('car', 'brand model').sort({ createdAt: -1 }).limit(6).lean({ virtuals: true })
   ]);
-  res.render('admin-dashboard', { pageTitle: 'Admin Dashboard - Drive Mart', stats: { users, cars, bookings, pending }, recent });
+  const pendingListings = await Car.countDocuments({ approvalStatus: 'pending' });
+  res.render('admin-dashboard', { pageTitle: 'Admin Dashboard - Drive Mart', stats: { users, cars, bookings, pending, pendingListings }, recent });
+});
+
+// FR05: Administrator reviews seller-provided documents before a car becomes public.
+router.get('/verifications', async (req, res) => {
+  const status = ['pending', 'approved', 'rejected'].includes(req.query.status) ? req.query.status : 'pending';
+  const cars = await Car.find({ seller: { $ne: null }, approvalStatus: status }).populate('seller', 'name email').sort({ createdAt: -1 }).lean();
+  return res.render('admin-verifications', { pageTitle: 'Listing Verifications - Drive Mart', cars, status });
+});
+router.get('/verifications/:id', async (req, res) => {
+  if (!isObjectId(req.params.id)) return res.redirect('/admin/verifications');
+  const car = await Car.findOne({ _id: req.params.id, seller: { $ne: null } }).populate('seller', 'name email').lean();
+  if (!car) return res.redirect('/admin/verifications');
+  const documents = await ListingDocument.find({ car: car._id }).select('type filename mimeType').lean();
+  return res.render('admin-verification-detail', { pageTitle: 'Verify Car - Drive Mart', car, documents });
+});
+router.get('/verifications/:id/documents/:type', async (req, res) => {
+  if (!isObjectId(req.params.id) || !['cnic', 'registration', 'numberPlate'].includes(req.params.type)) return res.sendStatus(404);
+  const doc = await ListingDocument.findOne({ car: req.params.id, type: req.params.type }).select('+data +iv +tag');
+  if (!doc) return res.sendStatus(404);
+  res.set({ 'Content-Type': doc.mimeType, 'Content-Disposition': 'attachment', 'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff' });
+  return res.send(decryptDocument(doc));
+});
+router.post('/verifications/:id/decision', verifyCsrf, async (req, res) => {
+  if (!isObjectId(req.params.id)) return res.redirect('/admin/verifications');
+  const car = await Car.findOne({ _id: req.params.id, seller: { $ne: null }, approvalStatus: 'pending' });
+  if (!car) { req.flash('error', 'Only pending seller listings can be reviewed.'); return res.redirect('/admin/verifications'); }
+  const decision = String(req.body.decision || '');
+  const note = String(req.body.note || '').trim().slice(0, 500);
+  if (!['approved', 'rejected'].includes(decision)) { req.flash('error', 'Invalid decision.'); return res.redirect(`/admin/verifications/${car._id}`); }
+  if (decision === 'rejected' && !note) { req.flash('error', 'Give a reason for rejection.'); return res.redirect(`/admin/verifications/${car._id}`); }
+  if (decision === 'approved') {
+    const types = await ListingDocument.distinct('type', { car: car._id });
+    if (!['cnic','registration','numberPlate'].every(type => types.includes(type))) { req.flash('error', 'All three verification documents are required before approval.'); return res.redirect(`/admin/verifications/${car._id}`); }
+  }
+  car.approvalStatus = decision;
+  car.verificationNotes = decision === 'rejected' ? note : '';
+  car.verifiedBy = req.session.user.id;
+  car.verifiedAt = new Date();
+  await car.save();
+  req.flash('success', `Listing ${decision}.`);
+  return res.redirect('/admin/verifications');
 });
 
 router.get('/bookings', async (req, res) => {
@@ -146,6 +190,7 @@ router.post('/cars/:id/delete', verifyCsrf, async (req, res) => {
   if (car) {
     const sharedImage = await Car.exists({ _id: { $ne: car._id }, image: car.image });
     await Booking.deleteMany({ car: car._id });
+    await ListingDocument.deleteMany({ car: car._id });
     await car.deleteOne();
     if (!sharedImage) await deleteCarImage(car.image, car.imagePublicId);
     req.flash('success', 'Car deleted successfully.');
