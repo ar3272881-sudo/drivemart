@@ -1,22 +1,49 @@
 const API_TIMEOUT_MS = 20000;
 function modelName() {
-  const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+  const model = process.env.GEMINI_MODEL?.trim() || 'gemini-3.5-flash-lite';
   if (!/^[a-zA-Z0-9._-]+$/.test(model)) throw new Error('Invalid GEMINI_MODEL');
   return model;
 }
-function configured() { return Boolean(process.env.GEMINI_API_KEY); }
+function configured() { return Boolean(process.env.GEMINI_API_KEY?.trim()); }
 async function askGemini(parts, maximumTokens = 300) {
   if (!configured()) { const e = new Error('Gemini is not configured. Add GEMINI_API_KEY in .env.'); e.status = 503; throw e; }
   let response;
   try {
     response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName()}:generateContent`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': process.env.GEMINI_API_KEY },
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': process.env.GEMINI_API_KEY.trim() },
       body: JSON.stringify({ contents: [{ role: 'user', parts }], generationConfig: { responseMimeType: 'application/json', temperature: 0.2, maxOutputTokens: maximumTokens } }),
       signal: AbortSignal.timeout(API_TIMEOUT_MS)
     });
   } catch { const e = new Error('AI service could not be reached. Try again later.'); e.status = 502; throw e; }
-  if (!response.ok) { const e = new Error('Gemini API request failed. Check the API key, model and quota.'); e.status = 502; throw e; }
+  if (!response.ok) {
+    // The client previously received the same generic message for every Gemini error.
+    // Do not log API keys, uploaded images, prompts or request headers.
+    let upstream = {};
+    try { upstream = await response.json(); } catch { /* empty/non-JSON error body */ }
+    const details = upstream?.error || {};
+    const upstreamMessage = String(details.message || '').slice(0, 500)
+      .replace(/AIza[\w-]{20,}/g, '[REDACTED_KEY]');
+    console.error('[Gemini API Error]', {
+      httpStatus: response.status,
+      code: details.status || 'UNKNOWN',
+      model: modelName(),
+      message: upstreamMessage || 'No upstream error message'
+    });
+    const explanations = {
+      400: 'Request rejected. Check model settings and the Vercel logs.',
+      401: 'API key rejected. Create a valid Gemini API key in Google AI Studio.',
+      403: 'API key not authorized or model/project access restricted.',
+      404: 'Model not found or not available to this API key.',
+      429: 'Quota or rate limit exceeded. Check Google AI Studio usage and billing.',
+      500: 'Google AI service encountered an internal error; retry later.',
+      503: 'Gemini service temporarily unavailable; retry later.'
+    };
+    const explanation = explanations[response.status] || 'See Vercel logs for the upstream error.';
+    const e = new Error(`Gemini HTTP ${response.status}: ${explanation}`);
+    e.status = 502;
+    throw e;
+  }
   const payload = await response.json();
   const content = payload.candidates?.[0]?.content?.parts?.map(v => v.text || '').join('') || '';
   try { return JSON.parse(content.replace(/^```(?:json)?\s*|\s*```$/g, '')); }
