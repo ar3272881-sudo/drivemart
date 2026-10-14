@@ -209,3 +209,6 @@
     .dm-chat-toggle{width:56px;height:56px;font-size:19px}
     .dm-chat-panel{position:fixed;right:10px;left:10px;bottom:82px;width:auto;height:min(610px,calc(100vh - 105px));border-radius:18px}
 }
+
+/* Explicitly label when Gemini is temporarily unavailable; never imply AI succeeded. */
+.dm-notice-message{font-size:11px;color:#ffdda3;background:rgba(140,90,10,.20);border:1px solid rgba(255,200,100,.30)}

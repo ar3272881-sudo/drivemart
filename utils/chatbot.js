@@ -1,4 +1,5 @@
 const Booking = require('../models/Booking');
+const { extractBudget } = require('./budget');
 
 function normalize(text) {
   return String(text || '').toLowerCase().replace(/[^a-z0-9.+\-\s]/g, ' ').replace(/\s+/g, ' ').trim();
@@ -12,20 +13,6 @@ function listCars(cars, limit = 6) {
   const lines = cars.slice(0, limit).map((car, index) => `${index + 1}. ${carLine(car)}`);
   if (cars.length > limit) lines.push(`Aur ${cars.length - limit} cars Inventory page par available hain.`);
   return lines.join('\n');
-}
-function extractBudget(text) {
-  const patterns = [
-    [/(\d+(?:\.\d+)?)\s*(?:crore|crores|cr|karor|karore)/i, 10000000],
-    [/(\d+(?:\.\d+)?)\s*(?:lakh|lakhs|lac|lacs)/i, 100000],
-    [/(\d+(?:\.\d+)?)\s*(?:million|mn)/i, 1000000],
-    [/(?:budget|under|below|andar|tak|max|maximum)\s*(?:rs\.?|pkr)?\s*(\d{6,12})/i, 1],
-    [/(?:rs\.?|pkr)\s*(\d{6,12})/i, 1]
-  ];
-  for (const [pattern, multiplier] of patterns) {
-    const match = text.match(pattern);
-    if (match) return Number(match[1]) * multiplier;
-  }
-  return null;
 }
 function findMatchingCars(text, cars) {
   return cars.filter((car) => {

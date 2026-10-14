@@ -83,7 +83,7 @@ The original PHP/MySQL project has been converted to:
 - Session authentication stored in MongoDB
 - bcrypt password hashing
 - Multer image uploads
-- Free database-based chatbot (no paid API)
+- Gemini AI chatbot in English/Roman Urdu using approved, available MongoDB car listings, budget-based recommendations and basic database assistant fallback
 
 The original red/black design, images, inventory, bookings, admin panel and chatbot are preserved.
 
@@ -134,3 +134,7 @@ CLOUDINARY_API_SECRET=...
 ```
 
 The included seed images remain in `public/uploads`; new production uploads use Cloudinary when configured.
+
+
+## Gemini AI Chatbot update
+The sitewide chatbot on every page uses the existing `POST /api/chatbot` endpoint. Express passes sanitized public car data (not personal user/verification documents) to Google Gemini via the server-only `GEMINI_API_KEY`, and validates recommended vehicle IDs and actual listing prices server-side. Supports English/Roman Urdu, budget input (e.g. `30 lakh`), short in-page conversation history, and an explicit basic-mode fallback if Gemini is unreachable. The new backend helper is `services/aiChatbot.js`, while `public/chatbot.js` and `views/partials/chatbot.ejs` provide the existing UI. See `GEMINI_CHATBOT_SETUP_ROMAN_URDU.md` for GitHub Desktop, Vercel and live testing instructions.

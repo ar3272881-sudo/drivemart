@@ -15,6 +15,8 @@
 
     const endpoint = root.dataset.endpoint || "/api/chatbot";
     const csrfToken = root.dataset.csrf || "";
+    const modeLabel = document.getElementById("dmChatMode");
+    const recentGeminiTurns = [];
     let busy = false;
 
     const setOpen = (open) => {
@@ -30,6 +32,7 @@
         const message = document.createElement("div");
         message.className = `dm-message ${type === "user" ? "dm-user-message" : "dm-bot-message"}`;
         if (type === "error") message.classList.add("dm-error-message");
+        if (type === "notice") message.classList.add("dm-notice-message");
         message.textContent = text;
         messages.appendChild(message);
         messages.scrollTop = messages.scrollHeight;
@@ -68,7 +71,7 @@
                 method: "POST",
                 headers: {"Content-Type": "application/json", "Accept": "application/json"},
                 credentials: "same-origin",
-                body: JSON.stringify({message, csrf_token: csrfToken})
+                body: JSON.stringify({message, csrf_token: csrfToken, history: recentGeminiTurns.slice(-6)})
             });
 
             const data = await response.json().catch(() => ({}));
@@ -79,6 +82,17 @@
             }
 
             addMessage(data.reply || "Sorry, mujhe response nahi mila.");
+            if (data.mode === "gemini") {
+                if (modeLabel) modeLabel.textContent = "Gemini AI • Verified DriveMart listings";
+                // Keep only short in-page Gemini turns; never save bookings or private messages.
+                recentGeminiTurns.push({ role: "user", text: message.slice(0, 450) });
+                recentGeminiTurns.push({ role: "assistant", text: String(data.reply || "").slice(0, 450) });
+                if (recentGeminiTurns.length > 6) recentGeminiTurns.splice(0, recentGeminiTurns.length - 6);
+            } else {
+                recentGeminiTurns.length = 0;
+                if (modeLabel) modeLabel.textContent = data.mode === "basic" ? "Basic mode • Gemini unavailable" : "Database-based answer";
+                if (data.notice) addMessage(data.notice, "notice");
+            }
         } catch (error) {
             typing.remove();
             addMessage(error instanceof Error ? error.message : "AI assistant is unavailable right now.", "error");

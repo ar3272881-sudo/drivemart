@@ -73,4 +73,4 @@ async function estimateCarPrice(car) {
   }
   return { estimatePKR, lowPKR, highPKR, reason: short(result.reason, 250), disclaimer: 'AI-generated indicative estimate, NOT a verified current Pakistan market price. Compare real listings and inspect the vehicle.' };
 }
-module.exports = { configured, scanCarImage, estimateCarPrice };
+module.exports = { configured, askGemini, scanCarImage, estimateCarPrice };
