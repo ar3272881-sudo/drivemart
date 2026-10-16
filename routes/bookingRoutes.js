@@ -11,7 +11,7 @@ const router = express.Router();
 async function loadAvailableCar(req, res) {
   if (!isObjectId(req.params.id)) { req.flash('error', 'Invalid car selected.'); res.redirect('/inventory'); return null; }
   const car = await Car.findById(req.params.id).lean();
-  if (!car) { req.flash('error', 'Car not found.'); res.redirect('/inventory'); return null; }
+  if (!car || car.hiddenByAdmin) { req.flash('error', 'Car not found.'); res.redirect('/inventory'); return null; }
   if ((car.approvalStatus && car.approvalStatus !== 'approved') || car.status !== 'available') { req.flash('error', 'This car is not currently available for booking.'); res.redirect(`/cars/${car._id}`); return null; }
   return car;
 }

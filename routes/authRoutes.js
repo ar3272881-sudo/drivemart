@@ -48,7 +48,7 @@ router.post('/login', loginLimiter, verifyCsrf, async (req, res) => {
   const password = String(req.body.password || '');
   const remember = req.body.remember_me === 'on';
   const user = await User.findOne({ email }).select('+passwordHash');
-  if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
+  if (!user || user.suspended || !(await bcrypt.compare(password, user.passwordHash))) {
     return res.status(401).render('login', { pageTitle: 'Login - Drive Mart', bodyClass: 'auth-page', error: 'Incorrect email address or password.', email });
   }
   await new Promise((resolve, reject) => req.session.regenerate(err => err ? reject(err) : resolve()));

@@ -50,6 +50,16 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => databasePromise.then(() => next()).catch(next));
+// FR10: block suspended users even if they have an old active session.
+app.use(async (req,res,next) => {
+  if (!req.session.user) return next();
+  try {
+    const User = require('./models/User');
+    const user = await User.findById(req.session.user.id).select('suspended').lean();
+    if (user && !user.suspended) return next();
+    req.session.destroy(() => res.redirect('/login'));
+  } catch (err) { next(err); }
+});
 app.use(require('./routes/authRoutes'));
 app.use(require('./routes/publicRoutes'));
 app.use(require('./routes/bookingRoutes'));
@@ -57,6 +67,10 @@ app.use('/seller', require('./routes/sellerRoutes'));
 app.use('/api/ai', require('./routes/aiRoutes'));
 app.use('/admin', require('./routes/adminRoutes'));
 app.use('/api', require('./routes/chatbotRoutes'));
+app.use(require('./routes/fr06ChatRoutes'));
+app.use(require('./routes/fr07BidRoutes'));
+app.use(require('./routes/fr09PasswordRoutes'));
+app.use('/admin', require('./routes/fr10ModerationRoutes'));
 
 // Friendly redirects from the former PHP version.
 const legacy = {

@@ -6,6 +6,8 @@ const carSchema = new mongoose.Schema({
   model: { type: String, required: true, trim: true, maxlength: 100 },
   year: { type: Number, required: true, min: 1900, max: 2100 },
   price: { type: Number, required: true, min: 0 },
+  city: { type: String, trim: true, maxlength: 80, default: '' },
+  hiddenByAdmin: { type: Boolean, default: false },
   color: { type: String, trim: true, maxlength: 60, default: '' },
   mileage: { type: Number, min: 0, max: 2000000, default: 0 },
   condition: { type: String, enum: ['excellent', 'good', 'fair', 'needs_work'], default: 'good' },

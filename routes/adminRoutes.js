@@ -15,7 +15,7 @@ router.use(requireAdmin);
 
 function validateCar(body, imageRequired, file, uploadError) {
   const values = {
-    brand: String(body.brand || '').trim(), model: String(body.model || '').trim(),
+    city: String(body.city || '').trim().slice(0,80), brand: String(body.brand || '').trim(), model: String(body.model || '').trim(),
     year: Number(body.year), price: Number(body.price), description: String(body.description || '').trim(),
     status: String(body.status || 'available')
   };

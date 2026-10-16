@@ -6,7 +6,7 @@
     <input type="hidden" name="csrf_token" value="<%= csrfToken %>">
     <label class="full-field">Car Photo *<input id="vehicleImage" type="file" name="image" accept="image/jpeg,image/png,image/webp,image/avif" <%= mode === 'add' ? 'required' : '' %>><small>Max 5MB. Select a clear vehicle photo to enable AI scanning.</small></label>
     <div class="full-field ai-tool-panel"><button type="button" id="scanVehicle" class="btn btn-secondary"><i class="fa-solid fa-wand-magic-sparkles"></i> Scan Image with Gemini AI</button><p id="scanResult" class="ai-feedback" role="status" aria-live="polite">Requires GEMINI_API_KEY on the server. Verify AI suggestions.</p></div>
-    <label>Brand *<input name="brand" value="<%= car.brand || '' %>" required maxlength="100" placeholder="e.g. Toyota"></label>
+    <label>City / Location<input name="city" maxlength="80" value="<%= car.city || '' %>" placeholder="e.g. Lahore"></label><label>Brand *<input name="brand" value="<%= car.brand || '' %>" required maxlength="100" placeholder="e.g. Toyota"></label>
     <label>Model *<input name="model" value="<%= car.model || '' %>" required maxlength="100" placeholder="e.g. Corolla"></label>
     <label>Year *<input type="number" name="year" value="<%= car.year ?? '' %>" min="1900" max="<%= currentYear+1 %>" required></label>
     <label>Color<input name="color" value="<%= car.color || '' %>" maxlength="60" placeholder="e.g. White"></label>

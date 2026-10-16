@@ -9,11 +9,11 @@ const { isObjectId } = require('../utils/helpers');
 const { encryptDocument } = require('../services/documentCrypto');
 const router = express.Router();
 router.use(requireSeller);
-const emptyCar = () => ({ brand: '', model: '', year: '', color: '', mileage: 0, condition: 'good', price: '', description: '' });
+const emptyCar = () => ({ city: '', brand: '', model: '', year: '', color: '', mileage: 0, condition: 'good', price: '', description: '' });
 const firstFile = (req, name) => req.files?.[name]?.[0];
 function fieldsFrom(body) {
   return {
-    brand: String(body.brand || '').trim(), model: String(body.model || '').trim(),
+    city: String(body.city || '').trim().slice(0,80), brand: String(body.brand || '').trim(), model: String(body.model || '').trim(),
     year: Number(body.year), color: String(body.color || '').trim(),
     mileage: Number(body.mileage), condition: String(body.condition || 'good'),
     price: Number(body.price), description: String(body.description || '').trim()

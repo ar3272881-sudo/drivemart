@@ -9,28 +9,33 @@ const { escapeRegex, isObjectId } = require('../utils/helpers');
 const router = express.Router();
 
 router.get('/', async (req, res) => {
-  const featured = await Car.find({ status: 'available', $or: [{ approvalStatus: 'approved' }, { approvalStatus: { $exists: false } }] }).sort({ createdAt: -1 }).limit(6).lean();
+  const featured = await Car.find({ status: 'available', hiddenByAdmin: { $ne: true }, $or: [{ approvalStatus: 'approved' }, { approvalStatus: { $exists: false } }] }).sort({ createdAt: -1 }).limit(6).lean();
   res.render('index', { pageTitle: 'Drive Mart | Premium Car Marketplace', hideSimpleFooter: true, featured });
 });
 
 router.get('/inventory', async (req, res) => {
   const search = String(req.query.search || '').trim();
   const status = String(req.query.status || '');
+  const city = String(req.query.city || '').trim().slice(0,80);
+  const minPrice=String(req.query.minPrice||'');const maxPrice=String(req.query.maxPrice||'');
   const allowedStatuses = ['available', 'booked', 'sold'];
-  const query = { $and: [{ $or: [{ approvalStatus: 'approved' }, { approvalStatus: { $exists: false } }] }] };
+  const query = { hiddenByAdmin: { $ne: true }, $and: [{ $or: [{ approvalStatus: 'approved' }, { approvalStatus: { $exists: false } }] }] };
+  if(city)query.city=new RegExp(escapeRegex(city),'i');
+  if(minPrice!==''&&Number.isFinite(Number(minPrice))&&Number(minPrice)>=0) query.price={$gte:Number(minPrice)};
+  if(maxPrice!==''&&Number.isFinite(Number(maxPrice))&&Number(maxPrice)>=0)query.price={...(query.price||{}),$lte:Number(maxPrice)};
   if (search) {
     const pattern = new RegExp(escapeRegex(search), 'i');
     query.$or = [{ brand: pattern }, { model: pattern }, { description: pattern }];
   }
   if (allowedStatuses.includes(status)) query.status = status;
   const cars = await Car.find(query).sort({ createdAt: -1 }).lean();
-  res.render('inventory', { pageTitle: 'Inventory - Drive Mart', cars, search, status, allowedStatuses });
+  res.render('inventory', { pageTitle: 'Inventory - Drive Mart', cars, search, status, city, minPrice, maxPrice, allowedStatuses });
 });
 
 router.get('/cars/:id', async (req, res) => {
   if (!isObjectId(req.params.id)) { req.flash('error', 'Invalid car selected.'); return res.redirect('/inventory'); }
   const car = await Car.findById(req.params.id).lean();
-  if (!car || (car.approvalStatus && car.approvalStatus !== 'approved' && req.session.user?.role !== 'admin' && String(car.seller) !== req.session.user?.id)) { req.flash('error', 'Car not found.'); return res.redirect('/inventory'); }
+  if (!car || (car.hiddenByAdmin && req.session.user?.role !== 'admin') || (car.approvalStatus && car.approvalStatus !== 'approved' && req.session.user?.role !== 'admin' && String(car.seller) !== req.session.user?.id)) { req.flash('error', 'Car not found.'); return res.redirect('/inventory'); }
   return res.render('car-details', { pageTitle: `${car.brand} ${car.model} - Drive Mart`, car });
 });
 
