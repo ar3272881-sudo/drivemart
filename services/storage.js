@@ -51,4 +51,12 @@ async function deleteCarImage(image, publicId = '') {
   await fs.unlink(path.join(__dirname, '..', 'public', 'uploads', safeName)).catch(() => undefined);
 }
 
-module.exports = { uploadCarImage, deleteCarImage, hasCloudinary };
+async function uploadGalleryImages(files = []) {
+  const saved=[];
+  try { for (const file of files) {
+    const result=await uploadCarImage(file);
+    saved.push({url:result.image,publicId:result.imagePublicId});
+  } return saved; }
+  catch(error) { await Promise.all(saved.map(image=>deleteCarImage(image.url,image.publicId))); throw error; }
+}
+module.exports = { uploadCarImage, uploadGalleryImages, deleteCarImage, hasCloudinary };

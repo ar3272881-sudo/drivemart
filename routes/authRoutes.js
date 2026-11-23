@@ -5,6 +5,7 @@ const { verifyCsrf } = require('../middleware/csrf');
 const { signJwt } = require('../services/jwt');
 const { setAuth, clearAuth } = require('../middleware/identity');
 const { rateLimit } = require('express-rate-limit');
+const {required:otpRequired}=require('../services/emailVerification');
 const router = express.Router();
 const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 15, standardHeaders: 'draft-7', legacyHeaders: false, message: 'Too many login attempts. Please retry in 15 minutes.' });
 const redirectForRole = role => role === 'admin' ? '/admin' : role === 'seller' ? '/seller' : '/dashboard';
@@ -30,8 +31,8 @@ router.post('/register', verifyCsrf, async (req, res) => {
   const values = { name, email, role };
   if (error) return res.status(422).render('register', { pageTitle: 'Register - Drive Mart', bodyClass: 'auth-page', error, values });
   try {
-    await User.create({ name, email, passwordHash: await bcrypt.hash(password, 12), role });
-    req.flash('success', 'Account created. Please login.');
+    await User.create({ name, email, passwordHash: await bcrypt.hash(password, 12), role,emailVerified:!otpRequired() });
+    req.flash('success', otpRequired()?'Account created. Login and verify your email to activate selling, bidding and messages.':'Account created. Please login.');
     return res.redirect('/login');
   } catch (err) {
     if (err?.code !== 11000) throw err;

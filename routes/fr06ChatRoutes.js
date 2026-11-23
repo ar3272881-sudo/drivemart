@@ -4,8 +4,10 @@ const Message = require('../models/Message');
 const {requireLogin}=require('../middleware/auth');
 const {verifyCsrf}=require('../middleware/csrf');
 const {isObjectId}=require('../utils/helpers');
+const { notify }=require('../services/notifications');
+const Bid=require('../models/Bid');
 const router=express.Router();
-router.use('/chat',requireLogin);
+router.use('/chat',requireLogin,require('../middleware/verifiedEmail').requireVerifiedEmail);
 async function conversation(req,res,next){
  try {
   if(!isObjectId(req.params.carId)) return res.status(400).send('Invalid car');
@@ -35,6 +37,12 @@ router.get('/chat/:carId/messages',conversation,async(req,res)=>{
 router.post('/chat/:carId/messages',verifyCsrf,conversation,async(req,res)=>{
  const body=String(req.body.body||'').trim();if(!body||body.length>1500)return res.status(422).json({error:'Message must contain 1-1500 characters'});
  const {car,buyer,seller}=req.chat;await Message.create({car:car._id,buyer,seller,sender:req.session.user.id,body});
+ const destination=String(req.session.user.id)===seller?buyer:seller;
+ await Promise.allSettled([notify(destination,'message',`New message about ${car.brand} ${car.model}`,`/chat/${car._id}${destination===seller?'?buyer='+buyer:''}`)]);
  res.status(201).json({ok:true});
+});
+router.get('/chat/:carId/bids',conversation,async(req,res)=>{
+ const bids=await Bid.find({car:req.chat.car._id,buyer:req.chat.buyer,seller:req.chat.seller}).sort({createdAt:-1}).limit(40).lean();
+ res.set('Cache-Control','no-store');res.json({bids:bids.map(b=>({amount:b.amount,status:b.status,createdAt:b.createdAt}))});
 });
 module.exports=router;

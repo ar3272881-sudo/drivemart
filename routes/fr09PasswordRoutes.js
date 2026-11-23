@@ -22,4 +22,26 @@ router.post('/reset-password/:token',limiter,verifyCsrf,async(req,res)=>{
  if(password.length<8||password.length>128)return res.status(422).render('fr09-reset',{pageTitle:'Reset Password',token,error:'Password must be 8-128 characters'});
  const reset=await PasswordReset.findOneAndUpdate({tokenHash:hash(token),usedAt:null,expiresAt:{$gt:new Date()}},{$set:{usedAt:new Date()}},{new:true});if(!reset)return res.status(400).send('Link expired or already used');
  await User.updateOne({_id:reset.user},{$set:{passwordHash:await bcrypt.hash(password,12)}});await PasswordReset.deleteMany({user:reset.user});req.flash('success','Password changed. Please login.');res.redirect('/login');
-});module.exports=router;
+});
+// Alternative password recovery: 6-digit email OTP, usable without opening an emailed link.
+const {sendPasswordOtp,resetByOtp,configured}=require('../services/passwordOtp');
+router.post('/forgot-password/otp',limiter,verifyCsrf,async(req,res,next)=>{
+ try{
+  const email=String(req.body.email||'').trim().toLowerCase();
+  if(email.length>150)return res.status(422).send('Invalid email');
+  const user=await User.findOne({email,suspended:{$ne:true}});
+  if(user){try{await sendPasswordOtp(user)}catch(e){console.warn('OTP delivery failed:',e.message);}}
+  res.render('fr09-otp-sent',{pageTitle:'Recovery Code Requested'});
+ }catch(error){next(error)}
+});
+router.get('/reset-password-otp',(req,res)=>res.render('fr09-otp-reset',{pageTitle:'Reset With Code',error:'',email:''}));
+router.post('/reset-password-otp',limiter,verifyCsrf,async(req,res,next)=>{
+ try{
+  const email=String(req.body.email||'').trim().toLowerCase(),code=String(req.body.code||'').trim(),password=String(req.body.password||'');
+  if(email.length>150||password.length<8||password.length>128)return res.status(422).render('fr09-otp-reset',{pageTitle:'Reset With Code',error:'Use a valid email and password of 8-128 characters.',email});
+  const ok=await resetByOtp(email,code,password);
+  if(!ok)return res.status(422).render('fr09-otp-reset',{pageTitle:'Reset With Code',error:'Invalid or expired code. Please request a new one.',email});
+  req.flash('success','Password changed. Please sign in.');res.redirect('/login');
+ }catch(error){next(error)}
+});
+module.exports=router;

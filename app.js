@@ -42,6 +42,7 @@ app.use((req, res, next) => {
   res.locals.currentUser = req.session.user || null;
   res.locals.isAdmin = req.session.user?.role === 'admin';
   res.locals.currentYear = new Date().getFullYear();
+  res.locals.emailVerificationEnabled = process.env.REQUIRE_EMAIL_VERIFICATION === 'true';
   res.locals.pageTitle = 'Drive Mart';
   res.locals.bodyClass = '';
   res.locals.hideSimpleFooter = false;
@@ -61,6 +62,8 @@ app.use(async (req,res,next) => {
   } catch (err) { next(err); }
 });
 app.use(require('./routes/authRoutes'));
+app.use(require('./routes/enhancedRoutes'));
+app.use(require('./routes/verificationRoutes'));
 app.use(require('./routes/publicRoutes'));
 app.use(require('./routes/bookingRoutes'));
 app.use('/seller', require('./routes/sellerRoutes'));

@@ -5,6 +5,8 @@ const { requireLogin } = require('../middleware/auth');
 const { verifyCsrf } = require('../middleware/csrf');
 const { isObjectId, todayInput, parseDateInput } = require('../utils/helpers');
 
+const {requireVerifiedEmail}=require('../middleware/verifiedEmail');
+const {notify}=require('../services/notifications');
 const router = express.Router();
 // Protect only booking endpoints; do not intercept unrelated /seller, /admin or /api routes.
 
@@ -16,13 +18,13 @@ async function loadAvailableCar(req, res) {
   return car;
 }
 
-router.get('/cars/:id/book', requireLogin, async (req, res) => {
+router.get('/cars/:id/book', requireLogin, requireVerifiedEmail, async (req, res) => {
   const car = await loadAvailableCar(req, res);
   if (!car) return;
   return res.render('booking-form', { pageTitle: `Book ${car.brand} ${car.model}`, car, error: '', values: { phone: '', preferred_date: todayInput() } });
 });
 
-router.post('/cars/:id/book', requireLogin, verifyCsrf, async (req, res) => {
+router.post('/cars/:id/book', requireLogin, requireVerifiedEmail, verifyCsrf, async (req, res) => {
   const car = await loadAvailableCar(req, res);
   if (!car) return;
   const phone = String(req.body.phone || '').trim();
@@ -34,6 +36,8 @@ router.post('/cars/:id/book', requireLogin, verifyCsrf, async (req, res) => {
   else if (await Booking.exists({ car: car._id, user: req.session.user.id, status: { $in: ['pending', 'approved'] } })) error = 'You already have an active booking for this car.';
   if (error) return res.status(422).render('booking-form', { pageTitle: `Book ${car.brand} ${car.model}`, car, error, values: { phone, preferred_date: preferredDateText || todayInput() } });
   await Booking.create({ car: car._id, user: req.session.user.id, phone, preferredDate, status: 'pending' });
+  const admins=await require('../models/User').find({role:'admin'}).select('_id').lean();
+  await Promise.allSettled(admins.map(admin=>notify(admin._id,'booking',`Booking request for ${car.brand} ${car.model}`,'/admin/bookings')));
   req.flash('success', 'Booking submitted. The admin will review it shortly.');
   return res.redirect('/bookings');
 });

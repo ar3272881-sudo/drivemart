@@ -1,15 +1,16 @@
 {
   "name": "drivemart-node",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
-  "description": "Drive Mart FYP - Node.js, Express, MongoDB and EJS car marketplace",
+  "description": "DriveMart enhanced FYP marketplace - profiles, favorites, recommendations, chat, bids, notifications, galleries, search and verification",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
     "dev": "node --watch app.js",
     "seed": "node scripts/seed.js",
     "check": "node scripts/check.js",
-    "test": "node --test tests/*.test.js"
+    "test": "node --test tests/*.test.js",
+    "render-check": "node scripts/render-check.js"
   },
   "engines": {
     "node": ">=20.19.0"

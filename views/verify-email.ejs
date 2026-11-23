@@ -1,0 +1,7 @@
+<%- include('partials/header') %><section class="page-section compact-section"><div class="form-panel"><div class="page-heading left-heading"><span>Account Security</span><h1>Verify Your Email</h1><p>Your address: <%= user.email %></p></div>
+<% if(user.emailVerified){ %><p>Verified. <a href="/dashboard">Go to dashboard</a>.</p><% }else{ %>
+<p>A one-time 6-digit code is required for this account. Codes are valid for 10 minutes, with a maximum of 5 attempts per code.</p>
+<% if(!configured){ %><p class="form-error">Email delivery is not configured. Ask the project administrator to set Resend credentials and EMAIL_OTP_SECRET.</p><% } %>
+<form class="app-form" method="post" action="/verify-email/send"><input name="csrf_token" type="hidden" value="<%= csrfToken %>"><button class="btn btn-secondary" <%= configured?'':'disabled' %>>Send / Resend Code</button></form>
+<form class="app-form" method="post" action="/verify-email/confirm"><input name="csrf_token" type="hidden" value="<%= csrfToken %>"><label>6-digit code<input name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required autocomplete="one-time-code"></label><button class="btn btn-primary">Verify Email</button></form>
+<% } %></div></section><%- include('partials/footer') %>
