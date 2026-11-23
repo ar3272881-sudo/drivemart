@@ -1,4 +1,13 @@
-<% if (!hideSimpleFooter) { %><footer class="simple-footer"><p>© <%= currentYear %> Drive Mart. All Rights Reserved.</p><a href="/#contact">Contact Support</a></footer><% } %>
+<footer class="dm-footer" id="contact">
+  <div class="dm-container dm-footer-grid">
+    <div class="dm-footer-brand"><a class="dm-footer-logo" href="/"><i class="fa-solid fa-gauge-high"></i> Drive<span>Mart</span></a><p>Your next car starts here. Explore listings, compare options, chat with sellers and make confident decisions.</p><div class="dm-footer-social"><a href="/#contact" aria-label="Contact DriveMart"><i class="fa-regular fa-envelope"></i></a><a href="/inventory" aria-label="Explore cars"><i class="fa-solid fa-car"></i></a></div></div>
+    <div><h3>Explore</h3><a href="/inventory">All Vehicles</a><a href="/#featured">Featured Cars</a><a href="/#brands">Popular Brands</a><a href="/recommendations">Car Recommendations</a></div>
+    <div><h3>Marketplace</h3><a href="/seller">Sell a Car</a><a href="/bookings">My Bookings</a><a href="/chat/inbox">Messages</a><a href="/favorites">Saved Cars</a></div>
+    <div><h3>Information</h3><a href="/#about">How DriveMart Works</a><a href="/#services">Our Services</a><a href="/#faq">FAQ &amp; Support</a><a href="/profile">My Account</a></div>
+    <div class="dm-footer-contact"><h3>Get in Touch</h3><p><i class="fa-solid fa-location-dot"></i> Car marketplace for Pakistan</p><p><i class="fa-regular fa-envelope"></i> info@drivemart.com</p><p><i class="fa-regular fa-circle-question"></i> Questions? Visit the FAQ section</p></div>
+  </div>
+  <div class="dm-footer-bottom"><div class="dm-container"><span>© <%= currentYear %> DriveMart. All rights reserved.</span><span>Discover. Compare. Drive.</span></div></div>
+</footer>
 <%- include('chatbot') %>
-<script src="/ai-tools.js"></script><script src="/script.js"></script><script src="/chatbot.js"></script>
+<script src="/ai-tools.js"></script><script src="/script.js"></script><script src="/chatbot.js"></script><script src="/drivemart-redesign.js"></script>
 </body></html>

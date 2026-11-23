@@ -1,1 +1,21 @@
-.feature-panel{max-width:1100px;margin:24px auto;padding:24px;background:rgba(128,128,128,.05);border-radius:14px}.feature-panel input{max-width:100%;padding:9px}.feature-panel .app-table{width:100%;overflow-wrap:anywhere}
+/* Style for chat, bids and moderation views. No request behavior is changed. */
+#messages{background:#fafbfc;color:#1c2b35;border-color:#e5e9eb!important;border-radius:12px!important;padding:18px!important;min-height:230px!important}
+#messages p{background:#fff;border:1px solid #e9edef;box-shadow:0 3px 12px rgba(17,30,40,.03);border-radius:10px;padding:12px 15px;margin:0 0 10px;line-height:1.65;max-width:92%;overflow-wrap:anywhere;color:#2c3b44;font-size:13px}
+#messages p strong{color:#ca8409;margin-right:5px}
+#chatForm{display:grid;grid-template-columns:1fr auto;align-items:end;gap:12px}
+#chatForm label{margin:0}#chatForm button{min-height:46px}
+#chatError{color:#ae3c27;margin-top:10px;font-size:13px}
+.chat-live-state{color:#63836b!important;font-size:11px!important;font-weight:700!important;margin-bottom:10px!important}
+.bid-pane{border-top:1px solid #e7ecef;margin-top:25px;padding-top:24px;color:#1f2d36}
+.bid-pane h2{font-family:'Manrope',sans-serif;font-size:21px;margin-bottom:12px}
+.bid-mini{background:#f8fafb;border:1px solid #e8edf0;border-radius:8px;padding:12px;margin:9px 0;color:#384550}
+body.dm-site .feature-panel .btn-secondary{color:#25333c!important}
+body.dm-site .feature-panel .btn-primary{color:#fff!important}
+body.dm-site .feature-panel hr{border:0;border-top:1px solid #e7ecef;margin:28px 0}
+body.dm-site .feature-panel>h1{font:800 clamp(26px,3vw,35px) 'Manrope',sans-serif;letter-spacing:-.9px;margin:0 0 13px}
+body.dm-site .feature-panel>h2{font:800 20px 'Manrope',sans-serif;margin:23px 0 11px}
+body.dm-site .feature-panel>article{background:#fafbfc;padding:17px!important;border:1px solid #e7ecef!important;border-radius:9px;margin:12px 0;color:#25323b}
+body.dm-site .feature-panel>p{color:#73808a;margin-bottom:18px}
+body.dm-site .feature-panel>p>a{color:#b87909;font-weight:800}
+body.dm-site .feature-panel .app-table{margin:17px 0 28px;max-width:100%;width:100%;min-width:700px}
+@media(max-width:620px){#chatForm{grid-template-columns:1fr}#chatForm button{width:100%}#messages p{max-width:100%}body.dm-site .feature-panel{overflow-x:auto}}

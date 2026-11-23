@@ -3,31 +3,80 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= pageTitle || 'Drive Mart' %></title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="Discover, compare and list cars with DriveMart's trusted marketplace and intelligent buying tools.">
+  <title><%= pageTitle || 'DriveMart — Find Your Next Car' %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css">
   <link rel="stylesheet" href="/drivemart.css">
-  <link rel="stylesheet" href="/chatbot.css"><link rel="stylesheet" href="/fr06-fr10.css"><link rel="stylesheet" href="/enhanced.css">
+  <link rel="stylesheet" href="/chatbot.css">
+  <link rel="stylesheet" href="/fr06-fr10.css">
+  <link rel="stylesheet" href="/enhanced.css">
+  <link rel="stylesheet" href="/drivemart-redesign.css">
 </head>
-<body class="<%= bodyClass || '' %>">
-<div class="top-bar">
-  <div class="left"><a href="tel:+923001234567"><i class="fa-solid fa-phone"></i> +92 300 1234567</a>&nbsp;&nbsp;<a href="mailto:info@drivemart.com"><i class="fa-solid fa-envelope"></i> info@drivemart.com</a></div>
-  <div class="right"><a href="/#about">About</a><a href="/#contact">Contact</a><a href="/#faq">FAQ</a></div>
+<body class="dm-site <%= bodyClass || '' %>">
+<div class="top-bar dm-utility-bar">
+  <div class="dm-container dm-utility-inner">
+    <div class="dm-utility-left"><span><i class="fa-solid fa-shield-halved"></i> Verified vehicle listings</span><span><i class="fa-solid fa-wand-magic-sparkles"></i> AI-assisted car discovery</span></div>
+    <div class="dm-utility-right"><span><i class="fa-solid fa-location-dot"></i> Pakistan</span><a href="/#contact"><i class="fa-regular fa-circle-question"></i> Help &amp; Contact</a></div>
+  </div>
 </div>
-<header class="site-header">
-  <a class="logo" href="/">Drive <span>Mart</span></a>
-  <nav id="primary-navigation" aria-label="Main navigation">
-    <a href="/#home">Home</a><a href="/inventory">Inventory</a><a href="/#featured">Luxury Cars</a><a href="/#brands">Brands</a><a href="/#services">Services</a><a href="/#contact">Contact</a>
-    <% if (currentUser) { %>
-      <a href="/dashboard">Welcome, <%= currentUser.name %></a><a href="/profile">Profile</a><% if(emailVerificationEnabled){ %><a href="/verify-email">Verify Email</a><% } %><a href="/favorites">Favorites</a><a href="/recommendations">For You</a><a href="/notifications">Notifications <small id="notificationCount"></small></a><% if (currentUser.role === 'seller' || isAdmin) { %><a href="/seller">Seller Portal</a><% } %><a href="/bookings">My Bookings</a><a href="/chat/inbox">Chats</a><a href="/my-bids">My Bids</a><% if(currentUser.role==='seller'||isAdmin){ %><a href="/seller/bids">Received Bids</a><% } %>
-      <% if (isAdmin) { %><a href="/admin">Admin</a><% } %>
-      <form method="post" action="/logout" class="nav-inline-form"><input type="hidden" name="csrf_token" value="<%= csrfToken %>"><button type="submit">Logout</button></form>
-    <% } else { %><a href="/login">Login</a><a href="/register">Register</a><% } %>
-  </nav>
-  <div class="nav-icons" aria-label="Quick links"><a href="/inventory" title="Search cars"><i class="fa-solid fa-magnifying-glass"></i></a><a href="<%= currentUser ? '/favorites' : '/login' %>" title="My saved cars"><i class="fa-regular fa-heart"></i></a><a href="<%= currentUser ? '/dashboard' : '/login' %>" title="Account"><i class="fa-regular fa-user"></i></a></div>
-  <button class="mobile-menu-toggle" type="button" aria-label="Open menu" aria-controls="primary-navigation" aria-expanded="false">
-    <i class="fa-solid fa-bars" aria-hidden="true"></i>
-  </button>
+<header class="site-header dm-site-header">
+  <div class="dm-container dm-navigation-shell">
+    <a class="logo dm-logo" href="/" aria-label="DriveMart home"><span class="dm-logo-mark"><i class="fa-solid fa-gauge-high"></i></span><span class="dm-logo-word">Drive<span>Mart</span><small>CAR MARKETPLACE</small></span></a>
+    <nav id="primary-navigation" class="dm-primary-nav" aria-label="Main navigation">
+      <a class="dm-nav-link" href="/">Home</a>
+      <a class="dm-nav-link" href="/inventory">Vehicles</a>
+      <a class="dm-nav-link" href="/#featured">Featured</a>
+      <a class="dm-nav-link" href="/#brands">Brands</a>
+      <a class="dm-nav-link" href="/#services">Services</a>
+      <a class="dm-nav-link" href="/#about">About Us</a>
+      <a class="dm-nav-link" href="/#contact">Contact</a>
+      <div class="dm-mobile-account-links">
+      <% if (currentUser) { %>
+        <a href="/dashboard">My Dashboard</a><a href="/profile">My Profile</a>
+        <a href="/favorites">Saved Cars</a><a href="/recommendations">For You</a>
+        <a href="/notifications">Notifications</a><a href="/bookings">My Bookings</a>
+        <a href="/chat/inbox">Messages</a><a href="/my-bids">My Offers</a>
+        <% if(currentUser.role==='seller'||isAdmin){ %><a href="/seller">Seller Garage</a><a href="/seller/bids">Received Offers</a><% } %>
+        <% if(isAdmin){ %><a href="/admin">Administration</a><% } %>
+        <% if(emailVerificationEnabled){ %><a href="/verify-email">Email Verification</a><% } %>
+      <% } else { %>
+        <a href="/login">Login</a><a href="/register">Create an Account</a>
+      <% } %>
+      </div>
+    </nav>
+    <div class="dm-header-actions">
+      <a class="dm-icon-link dm-hide-small" href="/inventory" aria-label="Search vehicles" title="Search cars"><i class="fa-solid fa-magnifying-glass"></i></a>
+      <a class="dm-icon-link dm-hide-small" href="<%= currentUser ? '/favorites' : '/login' %>" aria-label="Saved cars" title="Saved cars"><i class="fa-regular fa-heart"></i></a>
+      <% if (currentUser) { %>
+      <details class="dm-account-dropdown">
+        <summary class="dm-account-trigger"><i class="fa-regular fa-circle-user"></i><span>My Account</span><i class="fa-solid fa-chevron-down dm-chevron"></i></summary>
+        <div class="dm-account-panel">
+          <div class="dm-account-name">Hi, <%= currentUser.name %><small><%= currentUser.role === 'seller' ? 'Seller account' : (isAdmin ? 'Administrator' : 'Buyer account') %></small></div>
+          <a href="/dashboard"><i class="fa-regular fa-grid-2"></i> Dashboard</a>
+          <a href="/profile"><i class="fa-regular fa-user"></i> My Profile</a>
+          <a href="/favorites"><i class="fa-regular fa-heart"></i> Saved Cars</a>
+          <a href="/recommendations"><i class="fa-solid fa-wand-magic-sparkles"></i> Recommended for You</a>
+          <a href="/notifications"><i class="fa-regular fa-bell"></i> Notifications <span id="notificationCount" class="dm-count-tag"></span></a>
+          <a href="/bookings"><i class="fa-regular fa-calendar-check"></i> My Bookings</a>
+          <a href="/chat/inbox"><i class="fa-regular fa-comments"></i> Messages</a>
+          <a href="/my-bids"><i class="fa-solid fa-tags"></i> My Offers</a>
+          <% if(currentUser.role==='seller'||isAdmin){ %><a href="/seller"><i class="fa-solid fa-car-side"></i> Seller Garage</a><a href="/seller/bids"><i class="fa-solid fa-handshake"></i> Received Offers</a><% } %>
+          <% if(isAdmin){ %><a href="/admin"><i class="fa-solid fa-sliders"></i> Admin Panel</a><% } %>
+          <% if(emailVerificationEnabled){ %><a href="/verify-email"><i class="fa-regular fa-envelope"></i> Verify Email</a><% } %>
+          <form method="post" action="/logout" class="dm-account-logout"><input type="hidden" name="csrf_token" value="<%= csrfToken %>"><button type="submit"><i class="fa-solid fa-arrow-right-from-bracket"></i> Log out</button></form>
+        </div>
+      </details>
+      <% } else { %><a class="dm-header-login dm-hide-small" href="/login">Log In</a><a class="dm-header-login dm-hide-small" href="/register">Sign Up</a><% } %>
+      <a class="dm-cta-top" href="<%= currentUser && (currentUser.role === 'seller' || isAdmin) ? '/seller/cars/new' : (currentUser ? '/inventory' : '/register') %>"><%= currentUser && (currentUser.role === 'seller' || isAdmin) ? 'LIST A CAR' : 'FIND A CAR' %> <i class="fa-solid fa-arrow-right"></i></a>
+      <button class="mobile-menu-toggle" type="button" aria-label="Open menu" aria-controls="primary-navigation" aria-expanded="false"><i class="fa-solid fa-bars" aria-hidden="true"></i></button>
+    </div>
+  </div>
 </header>
-<% if(currentUser){ %><script>document.addEventListener('DOMContentLoaded',()=>{const tag=document.getElementById('notificationCount');if(!tag)return;async function refresh(){try{const r=await fetch('/notifications/count');if(!r.ok)return;const n=(await r.json()).count;tag.textContent=n?String(n):'';tag.className=n?'notification-pill':'';}catch(e){}}refresh();if(window.EventSource){const es=new EventSource('/events');es.onerror=()=>{es.close();setInterval(refresh,15000);};es.addEventListener('update',refresh);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});}else setInterval(refresh,15000);});</script><% } %>
+<% if (currentUser) { %>
+<script>document.addEventListener('DOMContentLoaded',()=>{const tag=document.getElementById('notificationCount');if(!tag)return;async function refresh(){try{const r=await fetch('/notifications/count');if(!r.ok)return;const n=(await r.json()).count;tag.textContent=n?String(n):'';tag.className=n?'dm-count-tag has-count':'dm-count-tag';}catch(e){}}refresh();if(window.EventSource){const es=new EventSource('/events');es.onerror=()=>{es.close();setInterval(refresh,15000);};es.addEventListener('update',refresh);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});}else setInterval(refresh,15000);});</script>
+<% } %>
 <% if (flash) { %><div class="flash-message flash-<%= flash.type || 'info' %>" role="alert"><%= flash.message || '' %></div><% } %>
