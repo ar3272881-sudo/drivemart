@@ -1,0 +1,11 @@
+PASTE INTO ORIGINAL DRIVEMART PROJECT:
+- services/mailer.js  -> replace existing services/mailer.js
+- views/verify-email.ejs -> replace existing views/verify-email.ejs
+- package.json -> replace root package.json
+- package-lock.json -> replace root package-lock.json
+
+GOOGLE APPS SCRIPT (NOT a DriveMart source folder):
+- Open google-apps-script/Code.gs and paste its contents into a new project at https://script.google.com
+- Follow README_ROMAN_URDU.md for Script Properties + Web App deployment.
+
+Do not replace .env with the sample. Do not upload secrets to GitHub.

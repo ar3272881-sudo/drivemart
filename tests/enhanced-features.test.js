@@ -52,10 +52,12 @@ test('Live user notifications stream only to subscribed user via SSE',async()=>{
 });
 
 test('Six-digit email code uses secret HMAC and verifies with rate-limited attempts',async()=>{
- const old={key:process.env.RESEND_API_KEY,from:process.env.RESET_FROM_EMAIL,secret:process.env.EMAIL_OTP_SECRET,enabled:process.env.REQUIRE_EMAIL_VERIFICATION};
- Object.assign(process.env,{REQUIRE_EMAIL_VERIFICATION:'true',RESEND_API_KEY:'test-key',RESET_FROM_EMAIL:'test@example.com',EMAIL_OTP_SECRET:'test-secret-for-otp'});
- const methods={one:EmailVerification.findOne,update:EmailVerification.findOneAndUpdate,del:EmailVerification.deleteOne,userUpdate:User.updateOne,fetch:global.fetch};
+ const old={gmail:process.env.GMAIL_USER,app:process.env.GMAIL_APP_PASSWORD,secret:process.env.EMAIL_OTP_SECRET,enabled:process.env.REQUIRE_EMAIL_VERIFICATION};
+ Object.assign(process.env,{REQUIRE_EMAIL_VERIFICATION:'true',GMAIL_USER:'test@gmail.com',GMAIL_APP_PASSWORD:'test-app-password',EMAIL_OTP_SECRET:'test-secret-for-otp'});
+ const mailer=require('../services/mailer');
+ const methods={one:EmailVerification.findOne,update:EmailVerification.findOneAndUpdate,del:EmailVerification.deleteOne,userUpdate:User.updateOne,send:mailer.sendMail};
  const db={verification:null,updated:null,code:null};
+ mailer.sendMail=async message=>{db.code=message.text.match(/\b\d{6}\b/)[0];return {messageId:'test-message'};};
  EmailVerification.findOne=async()=>db.verification;
  EmailVerification.findOneAndUpdate=async(q,update)=>{db.verification={...update.$set,save:async()=>{}};return db.verification;};
  EmailVerification.deleteOne=async()=>{db.verification=null;};
@@ -71,8 +73,8 @@ test('Six-digit email code uses secret HMAC and verifies with rate-limited attem
   assert.equal(db.updated.emailVerified,true);
   assert.equal(db.verification,null);
  }finally{
-  EmailVerification.findOne=methods.one;EmailVerification.findOneAndUpdate=methods.update;EmailVerification.deleteOne=methods.del;User.updateOne=methods.userUpdate;global.fetch=methods.fetch;
-  for(const [key,prop] of Object.entries({key:'RESEND_API_KEY',from:'RESET_FROM_EMAIL',secret:'EMAIL_OTP_SECRET',enabled:'REQUIRE_EMAIL_VERIFICATION'})){if(old[key]===undefined)delete process.env[prop];else process.env[prop]=old[key];}
+  EmailVerification.findOne=methods.one;EmailVerification.findOneAndUpdate=methods.update;EmailVerification.deleteOne=methods.del;User.updateOne=methods.userUpdate;mailer.sendMail=methods.send;
+  for(const [key,prop] of Object.entries({gmail:'GMAIL_USER',app:'GMAIL_APP_PASSWORD',secret:'EMAIL_OTP_SECRET',enabled:'REQUIRE_EMAIL_VERIFICATION'})){if(old[key]===undefined)delete process.env[prop];else process.env[prop]=old[key];}
  }
 });
 
